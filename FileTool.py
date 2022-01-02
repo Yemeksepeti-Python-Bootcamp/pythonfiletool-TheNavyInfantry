@@ -44,8 +44,8 @@ class FileToolClass(object):
             reader = csv.reader(csv_file)
             for row, search in enumerate(reader):
                 for each in search:
-                    if to_find in each.lstrip():
-                        match_list.append(f"Your query was found on row {row} : (as) {each.lstrip()}")
+                    if to_find in each.strip():
+                        match_list.append(f"Your query was found on row {row} : (as) {each.strip()}")
             print(*match_list, sep='\n')
 
     def delete_in_file(self, row_to_delete):
