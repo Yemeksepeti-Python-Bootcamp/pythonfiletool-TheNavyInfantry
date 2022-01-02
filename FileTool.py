@@ -63,7 +63,7 @@ class FileToolClass(object):
 
         print(f"Row {row_to_delete} is deleted from your file")
 
-    def append_on_file(self,*value_to_append):
+    def append_in_file(self,*value_to_append):
         to_append = []
         to_append.append(value_to_append)
 
@@ -214,7 +214,14 @@ def menu():
             obj.search_in_file(user_input)
 
         elif choice == 4:
-            pass
+            added = []
+            while True:
+                if len(added) == obj.get_header():
+                    break
+                add_data = input("Data to add: ")
+                added.append(add_data)
+
+            obj.append_in_file(*added)
 
 
         elif choice == 5:
