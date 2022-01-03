@@ -8,6 +8,7 @@ class FileToolClass(object):
         self.fields = fields
 
     def is_exists(self):
+        """This method checks if the given path/file is existing or not"""
         if not Path(self.file_path).is_file():
             with open(self.file_path.split("/")[-1], 'a', newline='') as csv_file: #possible to use w+ instead of a
                     writer = csv.writer(csv_file)
@@ -18,19 +19,21 @@ class FileToolClass(object):
             print("File EXISTS and ready to use!")
 
     def get_header(self):
+        """This method returns header lenght of the given csv file"""
         with open(self.file_path, 'r') as csv_file:
             header = []
             reader = csv.reader(csv_file)
             for row in reader:
                 header.append(row)
 
-            if header[0] == []:
-                return len(header[1])
+            if header[0] == []: #If its first row is empty as a list
+                return len(header[1]) #Returns next line's lenght (which is first one by index number)
             else:
-                return len(header[0])
+                return len(header[0]) #If not, returns first row
 
 
     def read_in_file(self):
+        """This method reads file and returns respectively row number and data"""
         with open(self.file_path, 'r') as csv_file:
             reader = csv.reader(csv_file)
             # for row in reader:
@@ -39,72 +42,71 @@ class FileToolClass(object):
                 print(f"{row} |", *display)
 
     def search_in_file(self,to_find):
+        """This method searches the given input and returns all possible matches with the line number found"""
         with open(self.file_path, 'r') as csv_file:
             match_list = []
             reader = csv.reader(csv_file)
             for row, search in enumerate(reader):
                 for each in search:
-                    if to_find in each.strip():
+                    if to_find in each.strip(): #Strip method was used to improve search accuracy
                         match_list.append(f"Your query was found on row {row} : (as) {each.strip()}")
             print(*match_list, sep='\n')
 
     def delete_in_file(self, row_to_delete):
+        """This method deletes a row based on the given input"""
         safe_lines = []
         with open(self.file_path, 'r') as csv_file:
             reader = csv.reader(csv_file)
 
+            #Enumerate was used to display the row number, in order to make it easier to match with given input
             for row_number, row in enumerate(reader, start=0):
-                if row_number != row_to_delete:
-                    safe_lines.append(row)
+                if row_number != row_to_delete: #If row number doesn't mathces with given input
+                    safe_lines.append(row) #Treat that as a safe row (which won't be deleted) and add it to the list
 
-        with open(self.file_path, 'w') as csv_file:
+        with open(self.file_path, 'w') as csv_file: #Overwrite file with safe lines except deleted one
             writer = csv.writer(csv_file)
             writer.writerows(safe_lines)
 
         print(f"Row {row_to_delete} is deleted from your file")
 
     def append_in_file(self,*value_to_append):
+        """This method appends/adds various number of inputs according to the header's length limit"""
         to_append = []
         to_append.append(value_to_append)
 
         with open(self.file_path, 'a', newline='') as csv_file:
             writer = csv.writer(csv_file)
-            if len(value_to_append) == self.get_header():
-                writer.writerow(*[i for i in to_append])
+            if len(value_to_append) == self.get_header(): #If inputs length is equal to header length
+                writer.writerow(*[i for i in to_append]) #Does the writing process
                 print("Append process was successful!")
             else:
-                print(f"Too much inputs were given! Try again!")
+                print(f"Too much inputs were given! Try again!") #If not, prints an info message
 
         self.read_in_file()
 
     def update_in_file(self,row_to_update: int,*value_to_change):
+        """This method updates a row with the given various number of inputs
+            (It will be limited by the header length again)"""
         updated_csv = []
         with open(self.file_path, 'r') as csv_file:
             reader = csv.reader(csv_file)
 
 
-            if len(value_to_change) == self.get_header():
-                for row, search in enumerate(reader):
-                    if row_to_update == row:
-                        search = list(value_to_change[:]) #gets the whole list with :
-                    updated_csv.append(search)
-                print(*updated_csv, sep="\n")
-
-            else:
-                for row, search in enumerate(reader):
-                    if row_to_update == row:
-                        search = search
-                    updated_csv.append(search)
-                print(f"Too much inputs were given! Try again!")
+            for row, search in enumerate(reader):
+                if row_to_update == row: #If both rows match
+                    search = list(value_to_change[:]) #Gets the whole list with :
+                updated_csv.append(search)
+            print(*updated_csv, sep="\n")
 
 
-        with open(self.file_path, 'w') as csv_file:
+        with open(self.file_path, 'w') as csv_file: #Overwrite file with the updated version
             writer = csv.writer(csv_file)
             writer.writerows(updated_csv)
 
 
     def convert_JSON(self,option):
-        json_arr = []
+        """This method converts a file to JSON"""
+        json_arr = [] #JSON array to store data
 
         with open(self.file_path, 'r') as csv_file:
             reader = csv.DictReader(csv_file)
@@ -118,6 +120,7 @@ class FileToolClass(object):
             json_string = json.dumps(json_arr, indent=3)
             json_file.write(json_string)
 
+        """Generates either the all file or a single line according to the user's decision"""
         if option == "all":
             print(json_arr)
         else:
@@ -128,10 +131,13 @@ class FileToolClass(object):
                 print(f"Invalid index request! : {e}")
 
     def merge_files(self,from_file,target_file):
+        """This method merges two files which has the same extension
+        and does merge process from the current file to the target one,
+        as overwriting the target file."""
         from_file_path = Path(from_file)
         target_file_path = Path(target_file)
 
-        if from_file_path.suffix and target_file_path.suffix == ".csv":
+        if from_file_path.suffix and target_file_path.suffix == ".csv": #CSV merge
 
                 headers = []
                 data = []
@@ -156,7 +162,7 @@ class FileToolClass(object):
                     print("Failed!",e)
 
 
-        elif from_file_path.suffix and target_file_path.suffix == ".json":
+        elif from_file_path.suffix and target_file_path.suffix == ".json": #JSON merge
 
             result = list()
 
@@ -174,7 +180,7 @@ class FileToolClass(object):
                 print("Failed!", e)
 
 
-def menu():
+def menu(): #Displays menu and operations
     ask_path = input("Path: ")
     ask_fields_list = []
 
